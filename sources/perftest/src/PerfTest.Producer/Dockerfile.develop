@@ -1,0 +1,25 @@
+# Development image
+#
+#   Builds an image for dotnet core aspnet development. This image runs dotnet core
+#   with a file watcher to hot-reload sources as they are modified. 
+#
+#  Usage:
+#   $ cd ./perftest
+#   $ docker build -t perftest-producer:dev -f src/PerfTest.Producer/Dockerfile.develop .
+#   $ docker run --rm -it -v "${pwd}:/app/" perftest-producer:dev      
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1
+ARG BUILD_CONFIGURATION=Debug
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true  
+
+# Restore packages to prime the package cache for the dev image
+WORKDIR /app
+COPY . .
+RUN dotnet restore src/PerfTest.Producer -nowarn:msb3202,nul1503 --ignore-failed-sources
+
+# Build development image, this assumes that ./perftest/src is mounted as /app/src
+RUN echo "dotnet build src/PerfTest.Producer -c ${BUILD_CONFIGURATION}" >> entrypoint.sh
+RUN echo "dotnet watch --project src/PerfTest.Producer -- run -c ${BUILD_CONFIGURATION} --no-launch-profile" >> entrypoint.sh
+
+ENTRYPOINT [ "/bin/sh", "entrypoint.sh" ]

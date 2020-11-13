@@ -1,0 +1,82 @@
+version: '3'
+
+dotenv: ['.env']
+
+silent: true
+
+includes:  
+  rabbit: ./services/rabbitmq  
+  perftest:
+    taskfile: ./sources/perftest/Taskfile.yml
+    dir: ./sources/perftest
+  
+vars:
+  SOLUTION_NAME: peftest
+  SOLUTION_DIR:
+    sh: pwd  
+    
+tasks:  
+  init:
+    cmds:
+      - cp docker-compose.local.yml.example docker-compose.local.yml    
+    status:
+      - test -f docker-compose.local.yml
+  
+  up:
+    desc: "Bring up the solution"
+    deps: [ init  ]    
+    cmds:
+      - docker-compose -p {{.SOLUTION_NAME}} -f docker-compose.yml -f docker-compose.local.yml up -d --no-recreate
+
+  down: 
+    desc: "Bring down the solution"
+    cmds:
+      - docker-compose -p {{.SOLUTION_NAME}} stop
+      - docker-compose -p {{.SOLUTION_NAME}} rm -f
+
+  restart:
+    desc: "Restart the solution"
+    cmds:
+      - task: down
+      - task: up
+  
+  status:
+    desc: "Display the status of all containers in the solution"
+    cmds:
+      - docker ps --format "table {{"{{"}}.ID{{"}}"}}\t{{"{{"}}.Names{{"}}"}}\t{{"{{"}}.Status{{"}}"}}\t{{"{{"}}.Image{{"}}"}}"
+
+  log:
+    desc: "Display logs for solution"
+    cmds: 
+      - docker-compose -p {{.SOLUTION_NAME}} logs -f --tail 100    
+
+  logs:
+    deps: [log]
+    
+  build:
+    desc: "Builds all container images"
+    cmds: 
+      - docker-compose -p {{.SOLUTION_NAME}} build --force-rm
+
+  push:
+    desc: "Pushes container images to remote repositories"
+    cmds:
+      - docker-compose push
+
+  pull:
+    desc: "Pulls the most recent container images"
+    cmds:
+      - docker-compose pull
+    
+  nuke:
+    desc: "Nuke all data files and reset the solution"  
+    deps: [ down ]
+    cmds:
+      - echo 'Pruning unused docker resources'
+      - docker system prune -af
+      - echo 'Deleting local service volume mounts ./data/'
+      - rm -rf ./data/
+    
+  default:
+    cmds:
+      - task -l

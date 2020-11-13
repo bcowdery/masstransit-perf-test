@@ -1,0 +1,37 @@
+version: '3'
+
+services:  
+  producer:    
+    image: perftest-producer
+    build: 
+      context: ./sources/perftest
+      dockerfile: src/PerfTest.Producer/Dockerfile
+    deploy:
+      replicas: 2      
+    depends_on:
+      - rabbit
+    environment:       
+      - 'ConnectionStrings__Rabbit=amqp://${RABBIT_USER}:${RABBIT_PASS}@rabbit/'
+      - 'Producer__MaxSendConcurrency=25'
+      - 'Producer__MaxSendCount=500000'
+
+  consumer:    
+    image: perftest-consumer
+    build: 
+      context: ./sources/perftest
+      dockerfile: src/PerfTest.Consumer/Dockerfile
+    depends_on:
+      - rabbit
+    environment:       
+      - 'ConnectionStrings__Rabbit=amqp://${RABBIT_USER}:${RABBIT_PASS}@rabbit/'      
+
+  rabbit:
+    image: rabbitmq:3.8-management-alpine   
+    ports:
+      - "${RABBIT_PORT}:5672"
+      - "${RABBIT_MGMT_PORT}:15672"
+    volumes:
+      - './data/rabbitmq/:/var/lib/rabbitmq/mnesia/:cached'
+    environment:
+      - 'RABBITMQ_DEFAULT_USER=${RABBIT_USER}'
+      - 'RABBITMQ_DEFAULT_PASS=${RABBIT_PASS}'

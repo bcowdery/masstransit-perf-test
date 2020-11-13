@@ -1,0 +1,51 @@
+version: '3'
+
+vars:
+  PERF_PRODUCER_NAME: perftest_producer
+  PERF_CONSUMER_NAME: perftest_consumer
+      
+tasks:    
+  log:
+    desc: "Show peftest logs"
+    cmds:
+      - docker logs {{.SOLUTION_NAME}}_{{.PERF_PRODUCER_NAME}}_1 -f --tail 100
+      - docker logs {{.SOLUTION_NAME}}_{{.PERF_CONSUMER_NAME}}_1 -f --tail 100
+
+  logs:
+    deps: [log]
+
+  restart:
+    desc: "Restart the perftest services"
+    cmds:
+      - cmd: docker rm -f {{.SOLUTION_NAME}}_{{.PERF_PRODUCER_NAME}}_1
+        ignore_error: true
+      - cmd: docker rm -f {{.SOLUTION_NAME}}_{{.PERF_CONSUMER_NAME}}_1
+        ignore_error: true        
+      - task: :up
+
+  sh:producer:
+    desc: "Connect to the perftest-producer shell"
+    cmds:
+      - docker exec -it {{.SOLUTION_NAME}}_{{.PERF_PRODUCER_NAME}}_1 bash
+      
+  sh:consumer:
+    desc: "Connect to the perftest-consumer shell"
+    cmds:
+      - docker exec -it {{.SOLUTION_NAME}}_{{.PERF_CONSUMER_NAME}}_1 bash
+
+  rmi:
+    desc: "Remove peftest images"
+    cmds:
+      - cmd: docker image rmi perftest-producer
+        ignore_error: true
+      - cmd: docker image rmi perftest-producer:dev
+        ignore_error: true        
+      - cmd: docker image rmi perftest-consumer
+        ignore_error: true           
+      - cmd: docker image rmi perftest-consumer:dev
+        ignore_error: true
+
+  default:
+    cmds:
+      - task -l
+    

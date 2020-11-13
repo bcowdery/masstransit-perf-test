@@ -1,0 +1,20 @@
+version: '3'
+
+# services:
+#   producer:  
+#     image: perftest-producer:dev
+#     build:
+#       dockerfile: src/PerfTest.Producer/Dockerfile.develop
+#     volumes:
+#       - ./sources/perftest/src/:/app/src/      
+#       - $HOME/.microsoft/usersecrets/:/root/.microsoft/usersecrets/
+#       - $APPDATA/Microsoft/UserSecrets/:/root/.microsoft/usersecrets/
+
+#   consumer:
+#     image: perftest-consumer:dev
+#     build: 
+#       dockerfile: src/PerfTest.Consumer/Dockerfile.develop
+#     volumes:
+#       - ./sources/perftest/src/:/app/src/        
+#       - $HOME/.microsoft/usersecrets/:/root/.microsoft/usersecrets/
+#       - $APPDATA/Microsoft/UserSecrets/:/root/.microsoft/usersecrets/
