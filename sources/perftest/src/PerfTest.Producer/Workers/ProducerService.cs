@@ -30,6 +30,7 @@ namespace PerfTest.Producer.Workers
         
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var uuid = NewId.NextGuid();
             var options = _producerOptions.Value;
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:record-timestamp"));
             
@@ -46,7 +47,7 @@ namespace PerfTest.Producer.Workers
                         TaskId = i,
                         ThreadId = Thread.CurrentThread.ManagedThreadId,
                         ExecutionCount = _executionCount,
-                        SentTime = DateTimeOffset.UtcNow
+                        SentTime = DateTime.UtcNow
                     });
 
                     _executionCount++;
@@ -59,6 +60,8 @@ namespace PerfTest.Producer.Workers
                     await Task.Delay(options.Interval, stoppingToken);
                 }
             }
+            
+            
         }
     }
 }

@@ -7,6 +7,6 @@ namespace PerfTest.Commands
         int TaskId { get; }
         int ThreadId { get; }
         int ExecutionCount { get; set; }
-        DateTimeOffset SentTime { get; } 
+        DateTime SentTime { get; } 
     }
 }

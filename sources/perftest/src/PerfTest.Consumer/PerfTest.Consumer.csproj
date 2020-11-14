@@ -5,14 +5,15 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>79E0FD33-A3C8-4224-A631-38DFA448D296</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <RootNamespace>PerfTest.Producer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>        
+    <PackageReference Include="Dapper" Version="2.0.35" />        
     <PackageReference Include="MassTransit" Version="7.0.4" />
     <PackageReference Include="MassTransit.AspNetCore" Version="7.0.4" />        
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.4" />
-    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.0.4" />    
+    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.0.4" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.4" />  
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.8" />    
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.8" />

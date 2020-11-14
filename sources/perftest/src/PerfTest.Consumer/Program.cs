@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PerfTest.Bootstrap;
 using PerfTest.Consumer.Consumers;
 
 namespace PerfTest.Consumer
@@ -35,23 +35,30 @@ namespace PerfTest.Consumer
                 })                
                 .ConfigureServices((hostContext, services) =>
                 {
-                    var configuration = hostContext.Configuration;
+                    var config = hostContext.Configuration;
 
-                    // Mass Transit
-                    services.AddMassTransit(x =>
+                    // Performance test services
+                    services.AddPerfTestServices(c =>
                     {
-                        x.AddConsumer<RecordTimestampConsumer>();
-                        x.SetKebabCaseEndpointNameFormatter();
-                        
-                        x.UsingRabbitMq((context, cfg) =>
-                        {
-                            cfg.Host(configuration.GetConnectionString("Rabbit"));
-                            cfg.ConfigureEndpoints(context);
-                        });
+                        c.ConnectionString = config.GetConnectionString("StatsDb");
                     });
                     
-                    services.AddMassTransitHostedService();
+                    // // Mass Transit
+                    // services.AddMassTransit(x =>
+                    // {
+                    //     x.AddConsumer<RecordTimestampConsumer>();
+                    //     x.SetKebabCaseEndpointNameFormatter();
+                    //     
+                    //     x.UsingRabbitMq((context, cfg) =>
+                    //     {
+                    //         cfg.Host(config.GetConnectionString("Rabbit"));
+                    //         cfg.ConfigureEndpoints(context);
+                    //     });
+                    // });
+                    //
+                    // services.AddMassTransitHostedService();
                 })
+                
                 .UseConsoleLifetime();                
     }
 }
