@@ -1,32 +1,37 @@
 version: '3'
 
-services:  
-  producer:    
+services:
+  producer:
     image: perftest-producer
     build: 
       context: ./sources/perftest
-      dockerfile: src/PerfTest.Producer/Dockerfile
+      dockerfile: src/PerfTest.Producer/Dockerfile      
     deploy:
-      replicas: 2      
+      replicas: 2
     depends_on:
-      - rabbit
+      rabbit:
+        condition: service_healthy
     environment:       
       - 'ConnectionStrings__Rabbit=amqp://${RABBIT_USER}:${RABBIT_PASS}@rabbit/'
       - 'Producer__MaxSendConcurrency=25'
-      - 'Producer__MaxSendCount=500000'
+      - 'Producer__MaxSendCount=100000'
 
   consumer:    
-    image: perftest-consumer
+    image: perftest-consumer    
     build: 
       context: ./sources/perftest
-      dockerfile: src/PerfTest.Consumer/Dockerfile
+      dockerfile: src/PerfTest.Consumer/Dockerfile  
     depends_on:
-      - rabbit
+      rabbit:
+        condition: service_healthy
+    volumes:
+      - ./reports:/app/reports    
     environment:       
-      - 'ConnectionStrings__Rabbit=amqp://${RABBIT_USER}:${RABBIT_PASS}@rabbit/'      
+      - 'ConnectionStrings__Rabbit=amqp://${RABBIT_USER}:${RABBIT_PASS}@rabbit/'     
+      - 'Consumer__ReportPath=/app/reports'
 
   rabbit:
-    image: rabbitmq:3.8-management-alpine   
+    build: ./services/rabbitmq/
     ports:
       - "${RABBIT_PORT}:5672"
       - "${RABBIT_MGMT_PORT}:15672"
