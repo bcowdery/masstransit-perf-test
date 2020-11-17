@@ -2,10 +2,11 @@
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PerfTest.Bootstrap;
 using PerfTest.Consumer.Consumers;
+using PerfTest.Consumer.Settings;
 
 namespace PerfTest.Consumer
 {
@@ -37,26 +38,26 @@ namespace PerfTest.Consumer
                 {
                     var config = hostContext.Configuration;
 
-                    // Performance test services
-                    services.AddPerfTestServices(c =>
+                    // Configuration options
+                    services.AddOptions();
+                    services.Configure<ConsumerOptions>(config.GetSection(ConsumerOptions.Consumer));
+                    
+                    // Mass Transit
+                    services.AddMassTransit(x =>
                     {
-                        c.ConnectionString = config.GetConnectionString("StatsDb");
+                        x.AddConsumer<RecordTimestampConsumer>();
+                        x.AddConsumer<GenerateReportConsumer>();
+                        
+                        x.SetKebabCaseEndpointNameFormatter();
+                        
+                        x.UsingRabbitMq((context, cfg) =>
+                        {
+                            cfg.Host(config.GetConnectionString("Rabbit"));
+                            cfg.ConfigureEndpoints(context);
+                        });
                     });
                     
-                    // // Mass Transit
-                    // services.AddMassTransit(x =>
-                    // {
-                    //     x.AddConsumer<RecordTimestampConsumer>();
-                    //     x.SetKebabCaseEndpointNameFormatter();
-                    //     
-                    //     x.UsingRabbitMq((context, cfg) =>
-                    //     {
-                    //         cfg.Host(config.GetConnectionString("Rabbit"));
-                    //         cfg.ConfigureEndpoints(context);
-                    //     });
-                    // });
-                    //
-                    // services.AddMassTransitHostedService();
+                    services.AddMassTransitHostedService();
                 })
                 
                 .UseConsoleLifetime();                

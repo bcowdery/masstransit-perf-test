@@ -3,9 +3,7 @@ using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using PerfTest.Commands;
-using PerfTest.Consumer.Data;
-using PerfTest.Consumer.Data.Entities;
-using PerfTest.Consumer.Data.Repositories;
+using PerfTest.Consumer.Stats;
 
 namespace PerfTest.Consumer.Consumers
 {
@@ -13,22 +11,25 @@ namespace PerfTest.Consumer.Consumers
         : IConsumer<RecordTimestamp>
     {
         private readonly ILogger<RecordTimestampConsumer> _logger;
-        private readonly StatsRepository _statsRepository;
 
-        public RecordTimestampConsumer(ILogger<RecordTimestampConsumer> logger, StatsRepository statsRepository)
+        public RecordTimestampConsumer(ILogger<RecordTimestampConsumer> logger)
         {
             _logger = logger;
-            _statsRepository = statsRepository;
         }
 
         public async Task Consume(ConsumeContext<RecordTimestamp> context)
         {
-            _logger.LogInformation("Consumed message {MessageId}", context.MessageId);
-
+            var receivedTime = DateTime.UtcNow;
             var message = context.Message;
-            var operation = Operation.CreateNew(message.TaskId, message.ThreadId, message.SentTime, DateTime.UtcNow);
+            
+            _logger.LogInformation("Consumed message {MessageId}", context.MessageId);
+            _logger.LogInformation("Task {TaskId}, Thread {ThreadId}, Producer {ProducerId}, Sent at {SentTime}",
+                message.TaskId,
+                message.ThreadId,
+                message.ProducerId,
+                message.SentTime);
 
-            await _statsRepository.InsertOperation(operation);
+            ConsumerStats.Add(message.ProducerId, (receivedTime - message.SentTime));
         }
     }
 }

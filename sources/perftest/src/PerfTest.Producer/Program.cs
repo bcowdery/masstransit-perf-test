@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PerfTest.Producer.Producers;
 using PerfTest.Producer.Workers;
 using PerfTest.Producer.Settings;
 
@@ -41,6 +42,10 @@ namespace PerfTest.Producer
                     services.AddOptions();
                     services.Configure<ProducerOptions>(config.GetSection(ProducerOptions.Producer));
                     
+                    // Test message producers
+                    // TODO: Allow producers to be data-driven. Build off of a "Producers" config section.
+                    services.AddScoped<IProducer, SingleQueueProducer>();
+                    
                     // Mass Transit
                     services.AddMassTransit(x =>
                     {
@@ -54,7 +59,7 @@ namespace PerfTest.Producer
                     });
                     
                     services.AddMassTransitHostedService();
-                    services.AddHostedService<ProducerService>();
+                    services.AddHostedService<ProducerBackgroundService>();
                 })
                 .UseConsoleLifetime();                
     }

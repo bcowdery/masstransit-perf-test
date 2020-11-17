@@ -6,7 +6,7 @@ namespace PerfTest.Commands
     {
         int TaskId { get; }
         int ThreadId { get; }
-        int ExecutionCount { get; set; }
+        Guid ProducerId { get; }
         DateTime SentTime { get; } 
     }
 }
