@@ -10,13 +10,13 @@ using PerfTest.Consumer.Stats;
 
 namespace PerfTest.Consumer.Consumers
 {
-    public class GenerateReportConsumer
-        : IConsumer<GenerateReport>
+    public class GenerateConsumerReportConsumer
+        : IConsumer<GenerateConsumerReport>
     {
         private readonly IOptions<ConsumerOptions> _options;
-        private readonly ILogger<GenerateReportConsumer> _logger;
+        private readonly ILogger<GenerateConsumerReportConsumer> _logger;
 
-        public GenerateReportConsumer(IOptions<ConsumerOptions> options, ILogger<GenerateReportConsumer> logger)
+        public GenerateConsumerReportConsumer(IOptions<ConsumerOptions> options, ILogger<GenerateConsumerReportConsumer> logger)
         {
             _options = options;
             _logger = logger;
@@ -24,7 +24,7 @@ namespace PerfTest.Consumer.Consumers
 
         protected ConsumerOptions Options => _options.Value;
         
-        public async Task Consume(ConsumeContext<GenerateReport> context)
+        public async Task Consume(ConsumeContext<GenerateConsumerReport> context)
         {
             _logger.LogInformation("Generating report ...");
             
@@ -41,7 +41,7 @@ namespace PerfTest.Consumer.Consumers
             
             // Writer report to disk
             var date = DateTime.Now;
-            var reportPath = Path.Join(Options.ReportPath, $"{date:yyyymmdd}.json");
+            var reportPath = Path.Join(Options.ReportPath, $"consumer-{Environment.MachineName}-{date:yyyymmdd}.json");
             await File.WriteAllTextAsync(reportPath, report);
         }
     }

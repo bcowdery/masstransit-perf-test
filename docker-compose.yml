@@ -11,8 +11,11 @@ services:
     depends_on:
       rabbit:
         condition: service_healthy
+    volumes:
+      - ./reports:/app/reports
     environment:       
       - 'ConnectionStrings__Rabbit=amqp://${RABBIT_USER}:${RABBIT_PASS}@rabbit/'
+      - 'Producer__ReportPath=/app/reports' 
       - 'Producer__MaxSendConcurrency=25'
       - 'Producer__MaxSendCount=100000'
 
@@ -35,8 +38,8 @@ services:
     ports:
       - "${RABBIT_PORT}:5672"
       - "${RABBIT_MGMT_PORT}:15672"
-    volumes:
-      - './data/rabbitmq/:/var/lib/rabbitmq/mnesia/:cached'
+#    volumes:
+#      - './data/rabbitmq/:/var/lib/rabbitmq/mnesia/:cached'
     environment:
       - 'RABBITMQ_DEFAULT_USER=${RABBIT_USER}'
       - 'RABBITMQ_DEFAULT_PASS=${RABBIT_PASS}'

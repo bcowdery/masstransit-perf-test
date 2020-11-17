@@ -2,7 +2,7 @@
 
 namespace PerfTest.Commands
 {
-    public interface GenerateReport
+    public interface GenerateConsumerReport
     {
     }
 }

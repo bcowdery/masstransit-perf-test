@@ -41,7 +41,6 @@ namespace PerfTest.Producer.Producers
                     {
                         TaskId = i,
                         ThreadId = Thread.CurrentThread.ManagedThreadId,
-                        ExecutionCount = _executionCount,
                         ProducerId = Id,
                         SentTime = DateTime.UtcNow
                     });

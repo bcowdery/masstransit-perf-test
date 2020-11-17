@@ -1,12 +1,12 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace PerfTest.Consumer.Stats
+namespace PerfTest.Metrics
 {
     public class Trend
     {
         private readonly object _syncLock = new object();
-        private readonly Guid _trendId;
+        private readonly string _trendId;
         
         private double _min = double.MaxValue;
         private double _max = 0.00d;
@@ -14,9 +14,14 @@ namespace PerfTest.Consumer.Stats
         private int _totalItems = 0;
         private double _totalDuration = 0.00d;
 
-        private DateTime _lastUpdated = DateTime.Now;
+        private DateTime _lastUpdated = DateTime.UtcNow;
 
-        public Trend(Guid trendId)
+        public Trend(Guid guid)
+        {
+            _trendId = guid.ToString();
+        }
+        
+        public Trend(string trendId)
         {
             _trendId = trendId;
         }
@@ -26,12 +31,12 @@ namespace PerfTest.Consumer.Stats
         [JsonProperty] public double Avg => Math.Round(_avg, 2);
         [JsonProperty] public int TotalItems => _totalItems;
         [JsonProperty] public double TotalDuration => Math.Round(_totalDuration, 2);
-        [JsonProperty] public string Throughput => $"{Math.Round((_totalItems / (_totalDuration / 1000)), 2)}/sec";
+        [JsonProperty] public string Throughput => $"{Math.Round((_totalItems / _totalDuration) * 1000, 2)}/sec";
        
         /// <summary>
         /// Time since the last update
         /// </summary>
-        [JsonIgnore] public TimeSpan LastUpdated => (DateTime.Now - _lastUpdated);
+        [JsonIgnore] public TimeSpan LastUpdated => (DateTime.UtcNow - _lastUpdated);
 
         /// <summary>
         /// Add a new data point
@@ -56,7 +61,7 @@ namespace PerfTest.Consumer.Stats
                 _totalItems++;
                 _totalDuration += duration;
                 _avg = (_totalDuration / _totalItems);
-                _lastUpdated = DateTime.Now;
+                _lastUpdated = DateTime.UtcNow;
             }
         }
     }

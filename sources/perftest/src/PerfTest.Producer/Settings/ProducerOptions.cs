@@ -6,7 +6,12 @@
         /// Config section key
         /// </summary>
         public const string Producer = "Producer";
-        
+         
+        /// <summary>
+        /// Report path to write JSON results to
+        /// </summary>
+        public string ReportPath { get; set; }
+
         /// <summary>
         /// Messages to send with every iteration.
         /// </summary>

@@ -48,8 +48,12 @@ namespace PerfTest.Producer.Workers
             _logger.LogInformation("Finished test.");
             
             // Generate consumer statistics reports
-            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:generate-report"));
-            await endpoint.Send<GenerateReport>(new {});
+            var consumerReportEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:generate-consumer-report"));
+            await consumerReportEndpoint.Send<GenerateConsumerReport>(new {}, stoppingToken);
+            
+            // Generate producer statistics reports
+            var producerReportEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:generate-producer-report"));
+            await producerReportEndpoint.Send<GenerateProducerReport>(new {}, stoppingToken);            
         }
     }
 }

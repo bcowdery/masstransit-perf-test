@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PerfTest.Commands;
+using PerfTest.Producer.Consumers;
 using PerfTest.Producer.Producers;
 using PerfTest.Producer.Workers;
 using PerfTest.Producer.Settings;
+using PerfTest.Producer.Stats;
 
 namespace PerfTest.Producer
 {
@@ -39,16 +43,21 @@ namespace PerfTest.Producer
                 {
                     var config = hostContext.Configuration;
 
+                    DiagnosticListener.AllListeners.Subscribe(new ProducerDiagnosticListener());
+
+                    // Configuration options
                     services.AddOptions();
                     services.Configure<ProducerOptions>(config.GetSection(ProducerOptions.Producer));
                     
                     // Test message producers
-                    // TODO: Allow producers to be data-driven. Build off of a "Producers" config section.
                     services.AddScoped<IProducer, SingleQueueProducer>();
+                    services.AddHostedService<ProducerBackgroundService>();
                     
                     // Mass Transit
                     services.AddMassTransit(x =>
                     {
+                        x.AddConsumer<GenerateProducerReportConsumer>();
+                        
                         x.SetKebabCaseEndpointNameFormatter();
                         
                         x.UsingRabbitMq((context, cfg) =>
@@ -59,7 +68,6 @@ namespace PerfTest.Producer
                     });
                     
                     services.AddMassTransitHostedService();
-                    services.AddHostedService<ProducerBackgroundService>();
                 })
                 .UseConsoleLifetime();                
     }

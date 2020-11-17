@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PerfTest.Consumer.Consumers;
 using PerfTest.Consumer.Settings;
+using PerfTest.Producer.Stats;
 
 namespace PerfTest.Consumer
 {
@@ -38,6 +40,8 @@ namespace PerfTest.Consumer
                 {
                     var config = hostContext.Configuration;
 
+                    DiagnosticListener.AllListeners.Subscribe(new ConsumerDiagnosticListener());
+                    
                     // Configuration options
                     services.AddOptions();
                     services.Configure<ConsumerOptions>(config.GetSection(ConsumerOptions.Consumer));
@@ -46,7 +50,7 @@ namespace PerfTest.Consumer
                     services.AddMassTransit(x =>
                     {
                         x.AddConsumer<RecordTimestampConsumer>();
-                        x.AddConsumer<GenerateReportConsumer>();
+                        x.AddConsumer<GenerateConsumerReportConsumer>();
                         
                         x.SetKebabCaseEndpointNameFormatter();
                         

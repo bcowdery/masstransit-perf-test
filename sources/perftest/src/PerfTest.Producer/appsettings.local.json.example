@@ -2,5 +2,9 @@
   "ConnectionStrings": {
     "SqlDatabase": "Server=localhost,11433;Database=skunkworks;User=sa;Password=r00tp@ssw0rD",
     "Rabbit": "amqp://guest:guest@localhost:15672/"
-  }
+  },
+  
+  "Producer": {
+    "ReportPath": "C:\temp\"
+  }    
 }
